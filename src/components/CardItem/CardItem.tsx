@@ -42,10 +42,10 @@ const CardItem = () => {
                 autoWidth
                 label="Select a Category"
               >
-                <MenuItem value={1}>electronics</MenuItem>
-                <MenuItem value={2}>jewelery</MenuItem>
-                <MenuItem value={3}>men's clothing</MenuItem>
-                <MenuItem value={4}>women's clothing</MenuItem>
+                <MenuItem value={"electronics"}>electronics</MenuItem>
+                <MenuItem value={"jewelery"}>jewelery</MenuItem>
+                <MenuItem value={"men's clothing"}>men's clothing</MenuItem>
+                <MenuItem value={"women's clothing"}>women's clothing</MenuItem>
               </Select>
             </FormControl>
 

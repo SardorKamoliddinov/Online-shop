@@ -1,3 +1,4 @@
+import Card from "../Card/Card";
 import CardItem from "../CardItem/CardItem";
 import Header from "../Header/Header";
 
@@ -7,6 +8,7 @@ const MainCard = () => {
       <Header />
       <hr />
       <CardItem />
+      <Card />
     </div>
   );
 };
