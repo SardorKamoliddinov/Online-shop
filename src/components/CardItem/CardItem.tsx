@@ -21,7 +21,6 @@ const CardItem = () => {
   };
 
   const handleSearch = () => {
-    // Bu yerda qidiruvni bajarish logikasi joylashadi
     console.log(searchQuery);
   };
   return (
@@ -50,7 +49,7 @@ const CardItem = () => {
             </FormControl>
 
             <TextField
-              sx={{ m: 1, width: 180 }} // sx propertisi orqali uslubni sozlash
+              sx={{ m: 1, width: 180 }} 
               size="small"
               variant="outlined"
               label="Search"
