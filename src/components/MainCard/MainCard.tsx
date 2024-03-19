@@ -7,7 +7,7 @@ const MainCard = () => {
     <div className="max-w-7xl h-full bg-white mx-auto mt-16 rounded-2xl">
       <Header />
       <hr />
-      <CardItem />
+      {/* <CardItem /> */}
       <Card />
     </div>
   );

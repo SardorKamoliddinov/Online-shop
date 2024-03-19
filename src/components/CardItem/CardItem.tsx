@@ -49,7 +49,7 @@ const CardItem = () => {
             </FormControl>
 
             <TextField
-              sx={{ m: 1, width: 180 }} 
+              sx={{ m: 1, width: 180 }}
               size="small"
               variant="outlined"
               label="Search"
