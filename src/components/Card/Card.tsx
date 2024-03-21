@@ -56,6 +56,22 @@ const Card = () => {
     }
   }, []);
 
+  const calculateTotalPrice = () => {
+    // Calculate total price of all liked products
+    let totalPrice = 0;
+    data?.forEach((product) => {
+      if (likedProducts.includes(product.id)) {
+        totalPrice += product.price;
+      }
+    });
+    return totalPrice;
+  };
+
+  const handleAddToCart = () => {
+    const totalPrice = calculateTotalPrice();
+    localStorage.setItem("totalPrice", totalPrice.toString());
+  };
+
   const handleLikeToggle = (productId: number) => {
     const updatedLikedProducts = likedProducts.includes(productId)
       ? likedProducts.filter((id) => id !== productId)
@@ -63,6 +79,7 @@ const Card = () => {
     setLikedProducts(updatedLikedProducts);
     localStorage.setItem("likedProducts", JSON.stringify(updatedLikedProducts));
   };
+  
 
   if (isLoading)
     return (
@@ -122,7 +139,8 @@ const Card = () => {
                     className="flex items-center justify-center gap-1.5 text-gray-500 hover:text-gray-600"
                   >
                     <ShoppingCartOutlinedIcon />
-                    <p>0 sum</p>
+                    {/* <p>0 sum</p> */}
+                    <p>{calculateTotalPrice()} sum</p>
                   </a>
                 </li>
                 <li>
@@ -224,7 +242,7 @@ const Card = () => {
               <h1 className="text-base text-center">{product.title}</h1>
               <div className="flex items-center justify-between w-full px-10">
                 <p>{product.price}</p>
-                <div className="border-solid border-2 border-gray-300 flex items-center justify-center text-xl rounded-lg text-gray-400 px-2">
+                <div className="border-solid border-2 border-gray-300 flex items-center justify-center text-xl rounded-lg text-gray-400 px-2" onClick={handleAddToCart}>
                   +
                 </div>
               </div>
@@ -265,7 +283,7 @@ const Card = () => {
                 ?.filter((product) => likedProducts.includes(product.id))
                 .map((product) => (
                   <div key={product.id} className="flex items-center gap-5">
-                    <FavoriteIcon className="text-red-500" />
+                    <FavoriteIcon className="text-red-500 cursor-pointer" onClick={() => handleLikeToggle(product.id)}/>
                     <img src={product.image} alt="" className="w-10 h-10" />
                     <p className="ml-2">{product.title}</p>
                   </div>
