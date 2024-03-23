@@ -38,8 +38,15 @@ const Card = () => {
   const [categories, setCategories] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [likedProducts, setLikedProducts] = useState<number[]>([]);
+  const [priceProducts, setPriceProduct] = useState<number[]>([]);
   const [eachProductInfo, setEachProductInfo] = useState<Product | null>(null);
   const [showBookmarks, setShowBookmarks] = useState(false);
+  const [showPriceMark, setShowPriceMark] = useState(false);
+  const [totalPrice, setTotalPrice] = useState<number>(0);
+  // const formattedPrice = product.price.toFixed(0);
+  const [productCounts, setProductCounts] = useState<{ [key: number]: number }>(
+    {}
+  );
   const { data, error, isLoading, isError } = useQuery<Product[], Error>(
     ["products", categories],
     () => fetchData(categories),
@@ -56,20 +63,42 @@ const Card = () => {
     }
   }, []);
 
-  const calculateTotalPrice = () => {
-    // Calculate total price of all liked products
-    let totalPrice = 0;
-    data?.forEach((product) => {
-      if (likedProducts.includes(product.id)) {
-        totalPrice += product.price;
-      }
-    });
-    return totalPrice;
+  const handleAddToCart = (productId: number) => {
+    const product = data?.find((product) => product.id === productId);
+    if (product) {
+      const productPrice = product.price;
+      setTotalPrice((prevTotalPrice) => prevTotalPrice + productPrice);
+      const updatedPriceProducts = [...priceProducts, productId];
+      setPriceProduct(updatedPriceProducts);
+      localStorage.setItem(
+        "priceProducts",
+        JSON.stringify(updatedPriceProducts)
+      );
+      // Har bir mahsulot uchun sanani o'zgartiramiz
+      setProductCounts((prevCounts) => ({
+        ...prevCounts,
+        [productId]: (prevCounts[productId] || 0) + 1,
+      }));
+    }
   };
 
-  const handleAddToCart = () => {
-    const totalPrice = calculateTotalPrice();
-    localStorage.setItem("totalPrice", totalPrice.toString());
+  const handleSubtractFromCart = (productId: number) => {
+    const productPrice = data?.find(
+      (product) => product.id === productId
+    )?.price;
+    if (productPrice) {
+      setTotalPrice((prevTotalPrice) => prevTotalPrice - productPrice);
+    }
+
+    const updatedPriceProducts = priceProducts.filter((id) => id !== productId);
+    setPriceProduct(updatedPriceProducts);
+    localStorage.setItem("priceProducts", JSON.stringify(updatedPriceProducts));
+
+    // Har bir mahsulot uchun sanani kamaytiramiz
+    setProductCounts((prevCounts) => ({
+      ...prevCounts,
+      [productId]: (prevCounts[productId] || 0) - 1,
+    }));
   };
 
   const handleLikeToggle = (productId: number) => {
@@ -79,7 +108,6 @@ const Card = () => {
     setLikedProducts(updatedLikedProducts);
     localStorage.setItem("likedProducts", JSON.stringify(updatedLikedProducts));
   };
-  
 
   if (isLoading)
     return (
@@ -91,6 +119,10 @@ const Card = () => {
 
   const handleMoreInfo = (product: Product) => {
     setEachProductInfo(product);
+  };
+
+  const getProductCount = (productId: number) => {
+    return productCounts[productId] || 0;
   };
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -112,6 +144,9 @@ const Card = () => {
   const handleToggleBookmarks = () => {
     setShowBookmarks((prevState) => !prevState);
   };
+  const handleTogglePrice = () => {
+    setShowPriceMark((prevState) => !prevState);
+  };
 
   return (
     <>
@@ -131,16 +166,16 @@ const Card = () => {
                 </h3>
               </div>
             </div>
-            <div style={{}}>
+            <div>
               <ul className="flex items-center justify-center gap-5">
                 <li>
                   <a
                     href="#"
+                    onClick={handleTogglePrice}
                     className="flex items-center justify-center gap-1.5 text-gray-500 hover:text-gray-600"
                   >
                     <ShoppingCartOutlinedIcon />
-                    {/* <p>0 sum</p> */}
-                    <p>{calculateTotalPrice()} sum</p>
+                    <p>{Math.round(totalPrice)} sum</p>
                   </a>
                 </li>
                 <li>
@@ -223,7 +258,6 @@ const Card = () => {
           {filteredData?.map((product) => (
             <div
               key={product.id}
-              onClick={() => handleMoreInfo(product)}
               className="px-2 py-3 rounded-[30px] flex items-center justify-around gap-3 flex-col w-64 h-96 border-solid border-2 border-gray-200 hover:-translate-y-1 hover:scale-110 hover:duration-500 hover:shadow-sm cursor-pointer ease-in duration-100 relative"
             >
               <div className="absolute top-5 right-3">
@@ -238,12 +272,32 @@ const Card = () => {
                   )}
                 </IconButton>
               </div>
-              <img src={product.image} alt="" className="w-44 h-44" />
-              <h1 className="text-base text-center">{product.title}</h1>
+              <img
+                src={product.image}
+                alt=""
+                className="w-44 h-44"
+                onClick={() => handleMoreInfo(product)}
+              />
+              <h1
+                className="text-base text-center"
+                onClick={() => handleMoreInfo(product)}
+              >
+                {product.title}
+              </h1>
               <div className="flex items-center justify-between w-full px-10">
-                <p>{product.price}</p>
-                <div className="border-solid border-2 border-gray-300 flex items-center justify-center text-xl rounded-lg text-gray-400 px-2" onClick={handleAddToCart}>
-                  +
+                <p>${product.price.toFixed(0)}</p>
+                <div className="border-solid border-2 border-gray-300 flex items-center justify-center text-xl rounded-lg text-gray-400 px-2">
+                  <IconButton onClick={() => handleAddToCart(product.id)}>
+                    +
+                  </IconButton>
+                  <p>{getProductCount(product.id)}</p>
+                  {getProductCount(product.id) > 0 && ( // Mahsulot soni 0 dan katta bo'lsa -
+                    <IconButton
+                      onClick={() => handleSubtractFromCart(product.id)}
+                    >
+                      -
+                    </IconButton>
+                  )}
                 </div>
               </div>
             </div>
@@ -283,11 +337,58 @@ const Card = () => {
                 ?.filter((product) => likedProducts.includes(product.id))
                 .map((product) => (
                   <div key={product.id} className="flex items-center gap-5">
-                    <FavoriteIcon className="text-red-500 cursor-pointer" onClick={() => handleLikeToggle(product.id)}/>
+                    <FavoriteIcon
+                      className="text-red-500 cursor-pointer"
+                      onClick={() => handleLikeToggle(product.id)}
+                    />
                     <img src={product.image} alt="" className="w-10 h-10" />
                     <p className="ml-2">{product.title}</p>
                   </div>
                 ))}
+            </div>
+          </div>
+        </>
+      )}
+      {showPriceMark && priceProducts.length > 0 && (
+        <>
+          <div
+            className="fixed top-0 left-0 w-full h-full z-10 bg-black bg-opacity-60"
+            onClick={() => setShowPriceMark(false)}
+          ></div>
+          <div className="fixed top-0 right-0 h-full bg-white w-96 z-10 flex flex-col p-4 shadow-lg overflow-y-scroll">
+            <h2 className="text-xl font-bold text-center">Закладки</h2>
+            <div className="flex flex-col gap-4 mt-4">
+              {data
+                ?.filter((product) => priceProducts.includes(product.id))
+                .map((product) => (
+                  <div key={product.id} className="flex items-center gap-5">
+                    <img src={product.image} alt="" className="w-16 h-16" />
+                    <p className="ml-2">{product.title}</p>
+                    <p>{getProductCount(product.id)}</p>
+                    <button
+                      className="text-2xl px-2 border-solid border-2 border-gray-300 rounded-lg"
+                      onClick={() => handleAddToCart(product.id)}
+                    >
+                      +
+                    </button>
+                    {getProductCount(product.id) > 0 && (
+                      <button
+                        className="text-2xl px-2 border-solid border-2 border-gray-300 rounded-lg"
+                        onClick={() => handleSubtractFromCart(product.id)}
+                      >
+                        -
+                      </button>
+                    )}
+                  </div>
+                ))}
+              <h2>
+                NDS: {Math.round(totalPrice)} sum +{" "}
+                {Math.round(totalPrice) * 0.2}
+              </h2>
+              <h2>Total {Math.round(totalPrice) * 1.2} sum</h2>
+              <button className="w-full h-full border-2 border-solid rounded-md border-blue-500 py-2 bg-blue-500 text-white">
+                Zakaz berish
+              </button>
             </div>
           </div>
         </>
