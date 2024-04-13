@@ -158,6 +158,7 @@ const Card = () => {
                 src={`${process.env.PUBLIC_URL}/store.jpg`}
                 alt="Logo"
                 className="w-10 h-10 rounded-full"
+                loading="lazy"
               />
               <div>
                 <h2 className="font-bold text-xl">SARDOR'S STORE</h2>
