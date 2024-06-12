@@ -43,7 +43,6 @@ const Card = () => {
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [showPriceMark, setShowPriceMark] = useState(false);
   const [totalPrice, setTotalPrice] = useState<number>(0);
-  // const formattedPrice = product.price.toFixed(0);
   const [productCounts, setProductCounts] = useState<{ [key: number]: number }>(
     {}
   );
@@ -56,7 +55,6 @@ const Card = () => {
   );
 
   useEffect(() => {
-    // Retrieve liked products from local storage when component mounts
     const likedProductsFromStorage = localStorage.getItem("likedProducts");
     if (likedProductsFromStorage) {
       setLikedProducts(JSON.parse(likedProductsFromStorage));
@@ -74,7 +72,6 @@ const Card = () => {
         "priceProducts",
         JSON.stringify(updatedPriceProducts)
       );
-      // Har bir mahsulot uchun sanani o'zgartiramiz
       setProductCounts((prevCounts) => ({
         ...prevCounts,
         [productId]: (prevCounts[productId] || 0) + 1,
